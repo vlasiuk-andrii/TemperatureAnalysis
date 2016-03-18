@@ -1,17 +1,26 @@
 import org.apache.commons.lang3.ArrayUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.Iterator;
-
 import static java.lang.Math.*;
 
 public class TemperatureSeriesAnalysis {
 
     double[] row = new double[] {3,5,-1,20,4,12,1,13,-13,44,-56};
 
+    boolean arrayIsEmpty(){
+        if(row.length == 0){
+            return true;
+        } else{
+            return false;
+        }
+    }
+
     double average(){
 //        Вычисляет средние значение температуры. Если ряд пустой генерирует IllegalArgumentException.
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
         double sum = 0;
         for(int i=0; i < row.length; i++){
             sum += row[i];
@@ -21,6 +30,8 @@ public class TemperatureSeriesAnalysis {
 
     double deviation(){
 //        Возвращает cреднеквадрати́ческое отклоне́ние температуры. Если ряд пустой генерирует IllegalArgumentException.
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
         double qsum = 0;
 
         double avg = average();
@@ -32,6 +43,8 @@ public class TemperatureSeriesAnalysis {
 
     double min(){
 //        Возвращает минимальную температур. Если ряд пустой генерирует IllegalArgumentException.
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
         double buffer = row[row.length-1];
         for(int i=0; i<row.length-1; i++){
             if (row[i] < buffer){
@@ -42,6 +55,8 @@ public class TemperatureSeriesAnalysis {
     }
     double max(){
 //        Возвращает максимальную температур. Если ряд пустой генерирует IllegalArgumentException.
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
         double buffer = row[row.length-1];
         for(int i=0; i<row.length-1; i++){
             if (row[i] > buffer){
@@ -54,6 +69,8 @@ public class TemperatureSeriesAnalysis {
 //      Возвращает значение температуры ближайшее к 0. Если ряд пустой генерирует IllegalArgumentException.
 //        Если в ряде несколько значений одинаково близки к 0 (к примеру -0.2 и 0.2),
 //        то возвращается положительное (большее) (т.е. 0.2)
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
         int indexOfClosestValue = 0;
         double result = 0;
         double buffer = abs( row[row.length-1] );
@@ -73,6 +90,8 @@ public class TemperatureSeriesAnalysis {
     }
     double findTempClosestToValue(double value){
 //      Аналогично предыдущему методу, только возвращает значение ближайшее к указанному tempValue
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
         double buffer = row[0];
 
         for (double elem : row) {
@@ -88,6 +107,8 @@ public class TemperatureSeriesAnalysis {
     double[] findTempsLessThan(double tempValue){
 //        Возвращает массив со значениями температуры меньше указанного tempValue.
 //        Если ряд пустой генерирует IllegalArgumentException.
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
         double a = 0;
         int j = 0;
         ArrayList orderedArrayList = new ArrayList();
@@ -124,6 +145,8 @@ public class TemperatureSeriesAnalysis {
     double[] findTempsGreaterThan(double tempValue){
 //        Возвращает массив со значениями температуры больше либо равно указанного tempValue.
 //        Если ряд пустой генерирует IllegalArgumentException.
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
         double a = 0;
         int j = 0;
         ArrayList orderedArrayList = new ArrayList();
@@ -167,6 +190,9 @@ public class TemperatureSeriesAnalysis {
 //        - double maxTemp;
 //        Если ряд пустой генерирует IllegalArgumentException.
 
+//        класс TemperatureSeriesAnalysis должен иметь конструктор по умолчанию и конструктор с параметром принимающий
+//        начальный ряд температур
+
         TempSummaryStatistics memory = new TempSummaryStatistics(this.average(), this.deviation(), this.min(), this.max());
         return memory;
     }
@@ -177,12 +203,29 @@ public class TemperatureSeriesAnalysis {
 //        Структура (массив) используемая в классе TemperatureSeriesAnalysis для хранения уже переданных температур должна
 //        увеличиваться в 2 раза, если в ней нет места для хранения новых значений.
 
-        double[] new_row = new double[row.length+new_temps.length];
-        new_row = ArrayUtils.addAll(row , new_temps);
-        double[] row = new double[new_row.length];
-        for(int i=0; i<row.length; i++){
-            row[i] = new_row[i];
+//        если в переданном ряде температур, встречается хоть одно значение меньше чем -273С, то все значения из данного
+//        ряда не должны добавляться к основному ряду и должно выбрасываться исключение InputMismatchException
+        if(arrayIsEmpty()) {throw new IllegalArgumentException();}
+
+        boolean superZero = false;
+        for(int i=0; i<new_temps.length; i++){
+            if(new_temps[i] < -273){
+                superZero = true;
+                break;
+            }
         }
+
+        if(superZero){
+            double[] new_row = new double[row.length+new_temps.length];
+            new_row = ArrayUtils.addAll(row , new_temps);
+            double[] row = new double[new_row.length];
+            for(int i=0; i<row.length; i++){
+                row[i] = new_row[i];
+            }
+        } else {
+            throw new InputMismatchException();
+        }
+
         return row.length;
     }
 
